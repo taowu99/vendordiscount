@@ -5,6 +5,10 @@ public class Discount
 	private int fromDate;
 	private int toDate;
 	private int priceInDollar;
+	
+	public Discount(Discount d) {
+		this(d.getFromDate(), d.getToDate(), d.getPriceInDollar());
+	}
 
 	public Discount(int fromDate, int toDate, int priceInDollar) {
 		this.fromDate = fromDate;

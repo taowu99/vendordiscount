@@ -14,7 +14,7 @@ public class DiscountCalculatorTest
     	discounts.add(new Discount(3,6,15000));
     	discounts.add(new Discount(2,8,25000));
     	discounts.add(new Discount(7,12,11000));
-    	//discounts.add(new Discount(1,31,22000));
+    	discounts.add(new Discount(1,31,22000));
     	
 		DiscountCalculator cal = new DiscountCalculator();
 		

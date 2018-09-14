@@ -47,30 +47,49 @@ public class DiscountCalculator
 		Queue<Discount> ends = new PriorityQueue(new DiscountComparator());
 		
 		for (Discount discount : data) {
-			Discount r = new Discount(discount.getFromDate(), discount.getToDate(), discount.getPriceInDollar());
 			
 			ends.add(new Discount(0, discount.getToDate(), discount.getPriceInDollar()));
-
-			if (!res.isEmpty()) {
+			
+			if (res.isEmpty()) {
+				res.add(new Discount(discount));
+			}
+			else {
 				Discount last = res.get(res.size()-1);
 				if (discount.getFromDate() <= last.getToDate()) {
 					if (discount.getPriceInDollar() < last.getPriceInDollar()) {
 						last.setToDate(discount.getFromDate()-1);
-						res.add(new Discount(discount.getFromDate(), discount.getToDate(), discount.getPriceInDollar()));
+						res.add(new Discount(discount));
+
+						last = res.get(res.size()-1);
+						while (ends.size()>0) {
+							if (ends.peek().getToDate() > last.getToDate()) 
+								break;
+							ends.poll();
+						}
+					}
+				}
+				else {
+					while (ends.size()>0) {
+						if (ends.peek().getToDate() > discount.getFromDate()) 
+							break;
+	
+						Discount end = ends.poll();
+						last.setToDate(end.getToDate());
+						res.add(new Discount(end.getToDate()+1, 0, end.getPriceInDollar()));
+						last = res.get(res.size()-1);
 					}
 				}
 			}
-			
-			Discount last = res.get(res.size()-1);
-			while (ends.size()>0)
-				if (ends.peek().getToDate() < last.getToDate()) {
-					ends.poll();
-				}
-				else {
-					
-				}
-			
-			res.add(r);
+		}
+		
+		Discount last = res.get(res.size()-1);
+		while (ends.size()>0) {
+			Discount end = ends.poll();
+			if (end.getToDate() < last.getToDate()) 
+				continue;
+
+			res.add(new Discount(last.getToDate()+1, end.getToDate(), end.getPriceInDollar()));
+			last = res.get(res.size()-1);
 		}
 		
 		return res;
