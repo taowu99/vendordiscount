@@ -21,7 +21,7 @@ public class DiscountController {
     @RequestMapping("/VendorBestPrices")
     public String index() {
         StringBuilder response = new StringBuilder();
-        List<Discount> discounts = discountCalculator.calculate0(prepareData());
+        List<Discount> discounts = discountCalculator.calculate(prepareData());
         for (Discount discount : discounts)
         	response.append(discount.toString());
         
