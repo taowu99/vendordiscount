@@ -3,6 +3,8 @@ package vendordiscount.msc;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -40,11 +42,20 @@ public class DiscountCalculator
 
 	public List<Discount> calculate1(List<Discount> data)
 	{
+		data.add(new Discount(1,31,Integer.MAX_VALUE));
+		
 		Collections.sort(data, new DiscountComparator());
 		
 		List<Discount> res = new ArrayList();
 		
-		Queue<Discount> ends = new PriorityQueue(new DiscountComparator());
+		Queue<Discount> ends = new PriorityQueue<Discount>(new Comparator<Discount>(){
+			@Override
+			public int compare(Discount d1, Discount d2) {
+				if (d1.getPriceInDollar() != d2.getPriceInDollar())
+					return d1.getPriceInDollar() - d2.getPriceInDollar();
+				return d1.getToDate() - d2.getToDate();
+			}
+		});
 		
 		for (Discount discount : data) {
 			
@@ -55,29 +66,22 @@ public class DiscountCalculator
 			}
 			else {
 				Discount last = res.get(res.size()-1);
-				if (discount.getFromDate() <= last.getToDate()) {
-					if (discount.getPriceInDollar() < last.getPriceInDollar()) {
-						last.setToDate(discount.getFromDate()-1);
-						res.add(new Discount(discount));
-
-						last = res.get(res.size()-1);
-						while (ends.size()>0) {
-							if (ends.peek().getToDate() > last.getToDate()) 
-								break;
-							ends.poll();
-						}
-					}
+				
+				while (last.getToDate()<discount.getFromDate() && ends.size()>0) {
+					Discount end = ends.poll();
+					if (end.getToDate() < last.getToDate()) 
+						continue;
+					res.add(new Discount(last.getToDate()+1, end.getToDate(), end.getPriceInDollar()));
+					last = res.get(res.size()-1);
 				}
-				else {
-					while (ends.size()>0) {
-						if (ends.peek().getToDate() > discount.getFromDate()) 
-							break;
-	
-						Discount end = ends.poll();
-						last.setToDate(end.getToDate());
-						res.add(new Discount(end.getToDate()+1, 0, end.getPriceInDollar()));
-						last = res.get(res.size()-1);
-					}
+				
+				if (discount.getPriceInDollar() < last.getPriceInDollar())
+				{
+					ends.add(new Discount(last));
+					last.setToDate(discount.getFromDate() - 1);
+					res.add(new Discount(discount));
+
+					last = res.get(res.size() - 1);
 				}
 			}
 		}
@@ -85,13 +89,16 @@ public class DiscountCalculator
 		Discount last = res.get(res.size()-1);
 		while (ends.size()>0) {
 			Discount end = ends.poll();
-			if (end.getToDate() < last.getToDate()) 
+			if (end.getToDate() < last.getToDate())
 				continue;
-
-			res.add(new Discount(last.getToDate()+1, end.getToDate(), end.getPriceInDollar()));
-			last = res.get(res.size()-1);
+			res.add(new Discount(last.getToDate() + 1, end.getToDate(), end.getPriceInDollar()));
+			last = res.get(res.size() - 1);
 		}
 		
+		Iterator<Discount> itr = res.iterator();
+		while (itr.hasNext())
+			if (itr.next().getPriceInDollar() == Integer.MAX_VALUE)
+				itr.remove();
 		return res;
 	}
 

@@ -35,5 +35,10 @@ public class DiscountCalculatorTest
 		
 		for (Discount d : cal.calculate1(discounts))
 			System.out.println(d.toString());
+		
+		cal = new DiscountCalculator();
+		
+		for (Discount d : cal.calculate(discounts))
+			System.out.println(d.toString());
 	}
 }

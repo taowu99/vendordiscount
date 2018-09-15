@@ -13,6 +13,6 @@ public class DiscountComparator implements Comparator<Discount>
 		if (o1.getToDate() != o2.getToDate())
 			return o1.getToDate() - o2.getToDate();
 		return o1.getPriceInDollar()-o2.getPriceInDollar();		
-	}
+	}	
 	
 }
